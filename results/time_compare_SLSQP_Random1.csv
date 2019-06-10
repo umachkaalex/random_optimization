@@ -1,4 +1,4 @@
-,Time-SLSQP,Time-Random,Sharpe-SLSQP,Sharpe-Random,Risk-SLSQP,Risk-Random,Stocks-SLSQP,Stocks-Random,Restart-SLSQP,Restart-Random
+Num_Stocks,Time-SLSQP,Time-Random,Sharpe-SLSQP,Sharpe-Random,Risk-SLSQP,Risk-Random,Stocks-SLSQP,Stocks-Random,Restart-SLSQP,Restart-Random
 50,0.29,25.12,8.4,10.2,0.15,0.129,20,20,0,1
 100,1.93,46.03,35.91,19.85,0.15,0.094,24,20,0,1
 250,8.22,82.73,115.57,91.185,0.15,0.142,23,20,0,2
