@@ -14,13 +14,18 @@ Airplane designers:
  - on one side have to minimize the size of aircraft to let it land at many airports as it possible
  - but on the other it's better to maximize its size to let it carry as more passengers as it's possible.
 Candy makers:
- - every month have to optimize the plan of production for hundreds of SKUs according to current demand (with correction on upcoming seasonality) to maximize revenues
-- but then it's desirable to minimize also costs - and to do this it's also would need to optimize production of certain SKUs, but this may not match the goals of optimization in purpose of maximization of revenues.
+ - every month have to optimize the plan of production for hundreds of SKUs according to current demand 
+ (with correction on upcoming seasonality) to maximize revenues
+- but then it's desirable to minimize also costs - and to do this it's also would need to optimize production
+of certain SKUs, but this may not match the goals of optimization in purpose of maximization of revenues.
 
-In the age of big data, productive computers and massive cloud computing, to solve such optimization problems became more convenient.
-But on the other hand - the bigger data you want to process the more complicated calculations you have to conduct. Let's take an example from real world - from the world of stock market. 
+In the age of big data, productive computers and massive cloud computing, to solve such optimization problems
+became more convenient.
+But on the other hand - the bigger data you want to process the more complicated calculations you have to conduct. 
+Let's take an example from real world - from the world of stock market. 
 
-Say, you want your investment portfolio to be optimized (or set up) based on  last month stock movements (believing the last month results would be the similar in the next month). 
+Say, you want your investment portfolio to be optimized (or set up) based on  last month stock movements 
+(believing the last month results would be the similar in the next month). 
 Let's load the stock data and python libraries that we will use and look inside the data.
 """
 
@@ -57,11 +62,15 @@ pr_end_date = pd.to_datetime('12/31/2017')
 
 """Here we have the closes prices of almost 5500 stocks for december of 2017.
 
-As the result of optimization we want to get the list of stocks and the list of their weights in portfolio which would maximize certain parameter (for example: returns) or vice versa - minimize (for example: risks).
+As the result of optimization we want to get the list of stocks and the list of their weights in portfolio
+which would maximize certain parameter (for example: returns) or vice versa - minimize (for example: risks).
 
-As the portfolio performance indicator we will use the financial industry common standard - sharpe ratio. To know more about this ratio you can read this investopedia article.
+As the portfolio performance indicator we will use the financial industry common standard - sharpe ratio.
+To know more about this ratio you can read this investopedia article.
 
-To make calculations simpler we will use only CAGR (portfolio return) as numerator and standard deviation (portfolio risk) as denominator. Thus the optimization algorithm should find such portfolio allocation that produces the maximally possible return with minimally possible risk.
+To make calculations simpler we will use only CAGR (portfolio return) as numerator and standard deviation 
+(portfolio risk) as denominator. Thus the optimization algorithm should find such portfolio allocation 
+that produces the maximally possible return with minimally possible risk.
 
 Let's define function that will count CAGR, standart deviation and sharpe ratio.
 """
@@ -97,7 +106,10 @@ def calc_fin_indicators(port_capital, start, end):
 
     return fin_indicators
 
-"""To calculate financial metrics this function requires daily portfolio performance for the period defined by start and end dates. So let's write such function."""
+"""
+To calculate financial metrics this function requires daily portfolio performance for the period defined
+by start and end dates. So let's write such function.
+"""
 
 def port_capital_flow(closes_data, st_cap, weights):
     # define the shape of array with closes
@@ -131,15 +143,21 @@ def port_capital_flow(closes_data, st_cap, weights):
     
     return port_perform
 
-"""In turn to calculate daily portfolio performance we need the list of weights:
+"""
+In turn to calculate daily portfolio performance we need the list of weights:
 - the array of closes we've already defined
 - “st_cap” is an integer, which determines the capital at the start of period.
 
-Also the list of weights is the object of optimization - this is the only values we can change to aim our goal - maximally possible sharpe ratio.
+Also the list of weights is the object of optimization - this is the only values we can change
+to aim our goal - maximally possible sharpe ratio.
 
-As our function is nonlinear and we have certain constraint (the sum of weights have to be equal 1)  we will use nonlinearly constrained gradient-based optimization: Sequential Least SQuares Programming (SLSQP) Algorithm. For this purpose we have loaded sklearn.optimize.minimize library. 
+As our function is nonlinear and we have certain constraint (the sum of weights have to be equal 1)
+we will use nonlinearly constrained gradient-based optimization: Sequential Least SQuares Programming
+(SLSQP) Algorithm. For this purpose we have loaded sklearn.optimize.minimize library. 
 
-So let us write function which will optimize weights that will maximize portfolio return and minimize risk (standard deviation) and thus maximize sharpe ratio. Remember that for now we are working in “past” period: we look back, optimize weights to see how it would be if it is as algorithm calculated.
+So let us write function which will optimize weights that will maximize portfolio return and minimize
+risk (standard deviation) and thus maximize sharpe ratio. Remember that for now we are working in “past” 
+period: we look back, optimize weights to see how it would be if it is as algorithm calculated.
 """
 
 def algo_optimization(closes_data, weights, st_cap, start, end, max_pos):
@@ -191,7 +209,11 @@ def algo_optimization(closes_data, weights, st_cap, start, end, max_pos):
 
     return opt_dict
 
-"""Additionally we need one more function that will a little bit correct the optimized weights. Because we optimize nonlinear function and there is constrain term, the sum of output weights are not always equal 1. So we have to add several additional lines of code to correct this."""
+"""
+Additionally we need one more function that will a little bit correct the optimized weights. 
+Because we optimize nonlinear function and there is constrain term, the sum of output weights are not 
+always equal 1. So we have to add several additional lines of code to correct this.
+"""
 
 def correct_weights(opt_weights, corr_value=0.001):
   # set to zeros weights that less than certain value (very little weights - as 
@@ -208,9 +230,14 @@ def correct_weights(opt_weights, corr_value=0.001):
     
     return opt_weights
 
-"""Before we combine all functions in one process we have to answer how we will initialize weights at start: should it be equal weights or random weights?
+"""
+Before we combine all functions in one process we have to answer how we will initialize weights at start:
+should it be equal weights or random weights?
 
-As we deal with gradient-based optimization we can turn to the machine learning theories and particularly to backpropagation and initialize weights randomly as it is more efficient for gradient calculations. But to be sure we are going in right way we will create two function to get both equal and random weights. Later we will compare this two approaches.
+As we deal with gradient-based optimization we can turn to the machine learning theories and particularly 
+to backpropagation and initialize weights randomly as it is more efficient for gradient calculations. But 
+to be sure we are going in right way we will create two function to get both equal and random weights. Later 
+we will compare this two approaches.
 """
 
 def init_weights(data, random=True):
@@ -226,7 +253,10 @@ def init_weights(data, random=True):
         
     return weights
 
-"""Now we can gather all functions into one and run optimization procedure, for example, with 10 first stocks of our dataset."""
+"""
+Now we can gather all functions into one and run optimization procedure, for example, 
+with 10 first stocks of our dataset.
+"""
 
 def optimization_procedure(algo_function, data, start, end, st_cap, n_iter=1, 
                            random=True, corr_value=0.001, max_pos=1., show_w=False,
@@ -310,14 +340,20 @@ eq_opt_dic = optimization_procedure(algo_optimization, all_pr_data_closes[:, :10
                                     random=False, show_w=True)
 print(eq_opt_dic)
 
-"""As we see the optimization process has done well: 
+"""
+As we see the optimization process has done well: 
 The portfolio sharpe ratio after optimization became much better:
-- with randomly initialized weights target parameter was -0.89 at the start and after optimization it became +4.895. Such gain reached first of all because of the return that became positive after optimization - +3.57%.  At start it was -1.73%: 9827/10000 - 1, where 9827 is portfolio value at the end of the period, 10000 - the start value.
+- with randomly initialized weights target parameter was -0.89 at the start and after optimization it 
+became +4.895. Such gain reached first of all because of the return that became positive after 
+optimization - +3.57%.  At start it was -1.73%: 9827/10000 - 1, where 9827 is portfolio value at the 
+end of the period, 10000 - the start value.
 
 - with equal weights the sharpe ratio was -1.04 before optimization and became +4.895 after it.
 
 The optimization “determined” that 4 opened positions better than 10.
-We received optimized weights both similar for random and equal initialized weights strategies. But with random weights finding local maximum is a little bit faster (15 iteration vs 18 iteration with equally weights).
+We received optimized weights both similar for random and equal initialized weights strategies. 
+But with random weights finding local maximum is a little bit faster 
+(15 iteration vs 18 iteration with equally weights).
 Let's run script with bigger numbers of stocks: 20, 50 and 100.
 """
 
@@ -355,13 +391,21 @@ eq_opt_dic = optimization_procedure(algo_optimization, all_pr_data_closes[:, 0:1
                                     random=False)
 print(eq_opt_dic)
 
-"""Looking at the optimization results of 50 and 100 stocks slicing we can observe quite different results: the algorithm determined that the “best” choice is to keep 1 stock in portfolio. In terms of theory of portfolio management it is very bad idea despite we have got much larger sharpe ratios after optimization. And this was caused by the bounds that we wrote in the “algo_optimization” function:
+"""
+Looking at the optimization results of 50 and 100 stocks slicing we can observe quite 
+different results: the algorithm determined that the “best” choice is to keep 1 stock in portfolio.
+In terms of theory of portfolio management it is very bad idea despite we have got much larger sharpe
+ratios after optimization. And this was caused by the bounds that we wrote in the “algo_optimization” function:
 
 *cur_bounds = [(0.0, max_pos) for l in range(len(weights[0]))]*
 
-This line means that the algorithm is allowed to assign to every open position from 0 up to “max_pos” weight in the portfolio. And as the default value is 1, we've got the result, where the portfolio consists of only one stock (as we allow 100% weight per 1 position).
+This line means that the algorithm is allowed to assign to every open position from 0 up to “max_pos” 
+weight in the portfolio. And as the default value is 1, we've got the result, where the portfolio consists
+of only one stock (as we allow 100% weight per 1 position).
 
-So we have to fix this: let's set that any stock could take no more than 10% of portfolio (in another words we want to buy at least 10 stocks to diversify portfolio) and run the algorithm one more time.
+So we have to fix this: let's set that any stock could take no more than 10% of portfolio 
+(in another words we want to buy at least 10 stocks to diversify portfolio)
+and run the algorithm one more time.
 """
 
 print('********50 stocks********')
@@ -387,9 +431,16 @@ eq_opt_dic = optimization_procedure(algo_optimization, all_pr_data_closes[:, 0:1
                                     max_pos=0.1, random=False)
 print(eq_opt_dic)
 
-"""Here we`ve received results with 20 and 40 opened positions and more realistic portfolio returns. And at this time algorithm ran longer.
+"""
+Here we`ve received results with 20 and 40 opened positions and more realistic portfolio returns. 
+And at this time algorithm ran longer.
 
-But what is better to use: random or equal weights? To understand this, we will create a loop, which will enlarge the amount of stocks to optimize within each new loop (starting from 10 position at the first loop, 10 stocks will be added in each loop - up to 500.) Also we will add additional loop for 100 various initialization of random weights with averaging that results (to decrease “random success or failure” of one initialization). This loops run quite long, so you can skip this part and jump to the next paragraph (that`s why it's commented out)
+But what is better to use: random or equal weights? To understand this, we will create a loop, 
+which will enlarge the amount of stocks to optimize within each new loop 
+(starting from 10 position at the first loop, 10 stocks will be added in each loop - up to 500.) 
+Also we will add additional loop for 100 various initialization of random weights with averaging that results 
+(to decrease “random success or failure” of one initialization). This loops run quite long, so you can skip 
+this part and jump to the next paragraph (that`s why it's commented out)
 """
 
 # # create empty DataFrame to store results
@@ -431,7 +482,9 @@ But what is better to use: random or equal weights? To understand this, we will 
 #     eq_opts.to_csv('equal_optimizations.csv', index=False)
 #     rand_opts.to_csv('random_optimizations.csv', index=False)
 
-"""We've got two .csv files with results of random and equal optimization of various numbers of stocks. Let's compare some metrics."""
+"""
+We've got two .csv files with results of random and equal optimization of various numbers of stocks. 
+Let's compare some metrics."""
 
 # load optimization data with random weights 
 r_w_url = 'https://raw.githubusercontent.com/umachkaalex/stockmarket/master/results/random_optimizations_f.csv'
@@ -453,16 +506,27 @@ plt.title('Algorithm Running Time')
 plt.plot(random_weights['Num'], random_weights['Time'], color='r')
 plt.plot(equal_weights['Num'], equal_weights['Time'], color='g')
 
-"""Plotting the graph with number of open position per portfolio and graph with the time of optimization processes do not give clear representation of what is better to use: random or equal weights. So let's print averages of this two tables."""
+"""
+Plotting the graph with number of open position per portfolio and graph with the time of optimization 
+processes do not give clear representation of what is better to use: random or equal weights. 
+So let's print averages of this two tables.
+"""
 
 print('****Random Weights:****\n'+str(random_weights.mean()))
 print('****Equal Weights:****\n'+str(equal_weights.mean()))
 
-"""Looking at averages we can find that equal weights give a little bit benefit  compared with random weights. So may be for purpose of optimizing stock portfolios its better to use initialization with equal weights. 
+"""
+Looking at averages we can find that equal weights give a little bit benefit  compared with random weights.
+So may be for purpose of optimizing stock portfolios its better to use initialization with equal weights. 
 
-Now let's back to the previous plots: we are interested in the number of open position per portfolio: the lowest and highest values. Roughly they are 10 and 60 respectively. But if 10 stocks per portfolio is limited by the bounds that we reset recently, the ceil value is not limited by anything (only by the number of stocks used at the start of optimization). 
+Now let's back to the previous plots: we are interested in the number of open position per portfolio: 
+the lowest and highest values. Roughly they are 10 and 60 respectively. But if 10 stocks per portfolio 
+is limited by the bounds that we reset recently, the ceil value is not limited by anything 
+(only by the number of stocks used at the start of optimization). 
 
-And here we face the problem of current way of optimization: the large number of stocks at the start can create allocation with a quite large number of stocks(left graph). Sometimes we may have a task to limit this number. Let's try to add new constraint which will ceil the maximum number of stocks per portfolio.
+And here we face the problem of current way of optimization: the large number of stocks at the start can
+create allocation with a quite large number of stocks(left graph). Sometimes we may have a task to limit this number. 
+Let's try to add new constraint which will ceil the maximum number of stocks per portfolio.
 """
 
 def algo_optimization_max_pos(closes_data, weights, st_cap, start, end,
@@ -505,10 +569,21 @@ eq_opt_dic = optimization_procedure(algo_optimization_max_pos, all_pr_data_close
                                     max_pos=0.1, random=False)
 print(eq_opt_dic)
 
-"""As we can see, added constraint has had no positive effect - no changes to weights has been made (as we've got 300 open position after optimization - the same as number before optimization). 
-This is quite objective because we had implemented the integer constraint (as the number of open positions can be only integer). As follows from the definition of sequential quadratic programming, it is used “on mathematical problems for which the objective function and the constraints are twice continuously differentiable”. And if constraints have to be continuously differentiable we can not use SLSQP method to optimizing problems with integer constraints. For this kind of tasks we have to use integer programming algorithms. But as the integer programming is NP-complete, this could not solve the another problem of optimization process: the larger number of stocks we will use, the exponential bigger time we will (algorithm) need to find the solution.
+"""
+As we can see, added constraint has had no positive effect - no changes to weights has been made 
+(as we've got 300 open position after optimization - the same as number before optimization). 
+This is quite objective because we had implemented the integer constraint 
+(as the number of open positions can be only integer). As follows from the definition of sequential 
+quadratic programming, it is used “on mathematical problems for which the objective function and the 
+constraints are twice continuously differentiable”. And if constraints have to be continuously
+differentiable we can not use SLSQP method to optimizing problems with integer constraints. 
+For this kind of tasks we have to use integer programming algorithms. But as the integer programming is NP-complete, 
+this could not solve the another problem of optimization process: the larger number of stocks we will use, 
+the exponential bigger time we will (algorithm) need to find the solution.
 
-So the goal we have here is "to get the best allocation of particular number of stocks, which gives the best sharpe ratio, in sensible time". The main thing here is that we want to limit our portfolio by the certain number (n) of stocks. So how can we find the “best n stocks” for our portfolio?
+So the goal we have here is "to get the best allocation of particular number of stocks, 
+which gives the best sharpe ratio, in sensible time". The main thing here is that we want to limit our portfolio
+by the certain number (n) of stocks. So how can we find the “best n stocks” for our portfolio?
 
 The approach could be the following:
 """
@@ -563,13 +638,15 @@ def algo_random_ports(tickers, closes_data, num_of_ports, stocks_in_port,
     
     return best_port, best_ind
 
-"""The scheme of this approach :
+"""
+The scheme of this approach :
 - create  n-number of random allocations ("num_of_ports") 
 - which consist of s-number of stocks ("stocks_in_port") 
 - calculate sharpe ratios for each such portfolio
 - derive sharpe ratio averages for each stock.
 
-The larger average sharpe ratio the stock has, more positive it influances on sharpe ratio of every random portfolio that includes that stock.
+The larger average sharpe ratio the stock has, more positive it influances on sharpe ratio of every
+random portfolio that includes that stock.
 
 Let's run this algorithm.
 """
@@ -582,7 +659,10 @@ best_port, best_ind = algo_random_ports(all_pr_tickers, all_pr_data_closes,
 # print top 20 stocks with the most positive influence on sharpe ratio 
 print(best_port)
 
-"""Now, when we have obtained the portfolio of 20 stocks, we can try to use SLSQP algorithm to optimize their weights."""
+"""
+Now, when we have obtained the portfolio of 20 stocks, we can try to use SLSQP algorithm 
+to optimize their weights.
+"""
 
 print('*****Equal*****')
 eq_opt_dic = optimization_procedure(algo_optimization, all_pr_data_closes[:, best_ind],
@@ -595,9 +675,16 @@ eq_opt_dic = optimization_procedure(algo_optimization, all_pr_data_closes[:, bes
                                     max_pos=0.1, random=True, show_w=True)
 print(eq_opt_dic)
 
-"""As we see any optimization has not been done, although algorithm has done 5 iteration. This could be caused by fact, that any liitle change in structure of such stocks allocation has no enough tangible influence on objective function (maximazing sharpe). But as we see - allocation could be found better than simple equal weights (look at random weights results) - so it makes sense to play around with SLSQP tuning.
+"""
+As we see any optimization has not been done, although algorithm has done 5 iteration. 
+This could be caused by fact, that any liitle change in structure of such stocks allocation has no enough 
+tangible influence on objective function (maximazing sharpe). But as we see - allocation could be found 
+better than simple equal weights (look at random weights results) - so it makes sense to play around with SLSQP tuning.
 
-In any case, the results of running our random script are very attractive: it found the solution that triples the starting capital (thus the sharpe ratio is very large) and it has done this almost in 1 minute. The same results you could achieve with the SLSQP method (without constraint of maximum size of portfolio), but this optimization lasts over 12 hours (48077 sec)… If you want you can run it and check the time).
+In any case, the results of running our random script are very attractive: it found the solution that triples
+the starting capital (thus the sharpe ratio is very large) and it has done this almost in 1 minute. 
+The same results you could achieve with the SLSQP method (without constraint of maximum size of portfolio),
+but this optimization lasts over 12 hours (48077 sec)… If you want you can run it and check the time).
 """
 
 # print('*****Equal*****')
@@ -610,7 +697,13 @@ In any case, the results of running our random script are very attractive: it fo
 # print(eq_opt_dic)
 # print(time.time()-s_time)
 
-"""But there is annother thing we should check: it's very likely that our random algorithm has chosen the stocks with very high return relatively to risk. Even if there is a very high risk shown by the stock, very high return could level it and lead to very high sharpe ratio (100 point of sharpe ratio sounds very attractive, but “one million” of risk within it - not likely). And to create portfolio with such stocks we don't need complicated algorithms: we can count returns for past period and take the Top-20 (or 10 or 30, etc.) most high yield stocks. Like this:"""
+"""But there is annother thing we should check: it's very likely that our random algorithm has chosen the
+stocks with very high return relatively to risk. Even if there is a very high risk shown by the stock, very
+high return could level it and lead to very high sharpe ratio (100 point of sharpe ratio sounds very attractive,
+but “one million” of risk within it - not likely). And to create portfolio with such stocks we don't need 
+complicated algorithms: we can count returns for past period and take the Top-20 (or 10 or 30, etc.) 
+most high yield stocks. Like this:
+"""
 
 returns = np.round(list(all_pr_data_closes[-1, :-1]/all_pr_data_closes[0, :-1]), 2)
 print('Top-20 highest returns: ' + str(sorted(returns)[len(returns) - 20:]))
@@ -619,16 +712,27 @@ top_20_idx = sort_returns_idx[len(returns) - 20:]
 top_20_most_stocks = np.asarray(all_pr_tickers)[top_20_idx]
 print('Top-20 highest yield stocks: ' + str(top_20_most_stocks))
 
-"""Someone could say that it would be more correct to calculate the "Sharpest" stocks, but this approach has another problem: the very tiny risk (std) forms the huge Sharpe ratio even if the return is little relatively to another stocks. Probably 5% risk and 50% of return (10 sharp ratio) is much better than 0.5% risk and 5% return (10 sharp ratio). You can check this approach - I've recieved zero intersection with random algorithm.
+"""
+Someone could say that it would be more correct to calculate the "Sharpest" stocks, 
+but this approach has another problem: the very tiny risk (std) forms the huge Sharpe ratio even if the return 
+is little relatively to another stocks. Probably 5% risk and 50% of return (10 sharp ratio)
+is much better than 0.5% risk and 5% return (10 sharp ratio). You can check this approach - 
+I've recieved zero intersection with random algorithm.
 
-So let's compare the list of stocks that were chosen by our random rating algorithm with those that are from simple sorting by return:
+So let's compare the list of stocks that were chosen by our random rating algorithm with those
+that are from simple sorting by return:
 """
 
 overlap_stocks = set(best_port).intersection(top_20_most_stocks) 
 print('Overlap Stocks: ' + str(overlap_stocks))
 print('Number of Overlap Stocks: ' + str(len(overlap_stocks)))
 
-"""We have 13 overlapping stocks from 20, and it is not 100% intersection that is quite reasonable: in random algorithm we calculate the Sharpe ratios neither separately for each stock, but in aggregate with other stocks in random allocation. The classical example of positive cross-influence could be the QQQ/TLT 60/40 of their allocation:"""
+"""
+We have 13 overlapping stocks from 20, and it is not 100% intersection that is quite reasonable:
+in random algorithm we calculate the Sharpe ratios neither separately for each stock, but in aggregate
+with other stocks in random allocation. The classical example of positive cross-influence could be the
+QQQ/TLT 60/40 of their allocation:
+"""
 
 # load data
 tlt_data = pd.read_csv('https://raw.githubusercontent.com/umachkaalex/stockmarket/master/TLT_2017.csv',
@@ -661,9 +765,12 @@ qqq_tlt_fins = calc_fin_indicators(qqq_tlt_perf, start_year, end_year)
 print('*******QQQ/TLT fins*******')
 print(qqq_tlt_fins)
 
-"""Comparing the financial indicators of three performances we can find that after combining QQQ and TLT we recieve less risk and better Sharpe ratio than QQQ and TLT have separately.
+"""
+Comparing the financial indicators of three performances we can find that after combining QQQ and TLT
+we recieve less risk and better Sharpe ratio than QQQ and TLT have separately.
 
-But let's back to our algorithm. What are the main financial results of random approach and simple rating: return, risk, sharpe ratio?
+But let's back to our algorithm. What are the main financial results of random approach and simple rating:
+return, risk, sharpe ratio?
 """
 
 # high yield top 20 stocks performance 
@@ -684,11 +791,17 @@ random_best_equal_weights_params = calc_fin_indicators(random_best_perform_equal
 print('Random Rating best 20 stocks return: ' + str(random_best_return))
 print('Random Rating best 20 stocks risk: ' + str(round(random_best_equal_weights_params['st_dev'], 2)))
 
-"""As we see the results quite similar but simple sorting seems to be “better” (here we don't compare sharpe ratios due to short period of time and very high returns). 
+"""
+As we see the results quite similar but simple sorting seems to be “better” (here we don't compare sharpe ratios
+due to short period of time and very high returns). 
 
-Actually both of approaches haven't worked good, because of huge risk that we've got. 200% of return with 300% of risk is not a good idea.
+Actually both of approaches haven't worked good, because of huge risk that we've got. 200% of return with 300%
+of risk is not a good idea.
 
-First of all, this happened because we didn't filter our dataset and it includes many "penny" stocks which 50 cent movement casues 50% return and  at the same time creates a big risk. And also we didn't set additional constraint which should have regularized (limit) the maximum of acceptable risk (standard deviation). So let's implement this constraint to reviewed algorithms and filter our dataset.
+First of all, this happened because we didn't filter our dataset and it includes many "penny" stocks which
+50 cent movement casues 50% return and  at the same time creates a big risk. And also we didn't set additional
+constraint which should have regularized (limit) the maximum of acceptable risk (standard deviation). 
+So let's implement this constraint to reviewed algorithms and filter our dataset.
 """
 
 print(all_pr_data_closes.shape)
@@ -767,7 +880,10 @@ def algo_random_ports_risk(tickers, closes_data, num_of_ports, stocks_in_port,
 # print('Top-20 highest yield stocks risk: ' + str(round(r_port_params['st_dev'], 4)))
 # print(r_port_params)
 
-"""33.65% return and 15% risk are good enough indicators of portfolio performance. But are this indicators stable? In another words: why do we use "np.random.seed(5)". Let's pass 10 loops with various seed value:"""
+"""
+33.65% return and 15% risk are good enough indicators of portfolio performance. But are this indicators stable?
+In another words: why do we use "np.random.seed(5)". Let's pass 10 loops with various seed value:
+"""
 
 # for r in range(1,11):
 #   np.random.seed(r)
@@ -786,16 +902,25 @@ def algo_random_ports_risk(tickers, closes_data, num_of_ports, stocks_in_port,
 #         + str(round(r_port_params['st_dev'], 4)) + ' | Overlap Stocks: '
 #         + str(len(overlap_stocks)))
 
-"""The passed loops show that the results of random ports could vary depending on seed value and that risk could be little higher than 0.15 set as limit.
-Also there are two "stable things": we don't overlap anymore with high yield stocks and the ratio between return and risk is always more than 1.5.
-But of course we want to minimize the randomness of final result and get closer to 0.15 risk. This issue we can try to solve by increasing the number of random ports which are created for each ticker. Above you can find such two prints:
+"""
+The passed loops show that the results of random ports could vary depending on seed value and that risk
+could be little higher than 0.15 set as limit.
+Also there are two "stable things": we don't overlap anymore with high yield stocks and the ratio between
+return and risk is always more than 1.5.
+But of course we want to minimize the randomness of final result and get closer to 0.15 risk. This issue
+we can try to solve by increasing the number of random ports which are created for each ticker.
+Above you can find such two prints:
 "Average appearance: 201.0"
 "StDev of appearance: 13.59"
-They mean that average appearance of each stock in all random ports are about 200 times with possible divergence +/- 13.6 times. 
+They mean that average appearance of each stock in all random ports are about 200 times
+with possible divergence +/- 13.6 times. 
 
-As we have normal distribution in random algorithm, the number 200 is the result of two parameters: number of ports per 1 stock (10) and number of stocks per 1 portfolio (20). Let's increase "the num_of_ports" and look what we'l get. For this purpose I have created a complex loop that will:
+As we have normal distribution in random algorithm, the number 200 is the result of two parameters:
+number of ports per 1 stock (10) and number of stocks per 1 portfolio (20). Let's increase 
+"the num_of_ports" and look what we'l get. For this purpose I have created a complex loop that will:
 1. Create several loops with different number of random stocks per each loop.
-2. For each such stock sampling we will run several loops with different numbers of random ports that have to be created during running random algorithm.
+2. For each such stock sampling we will run several loops with different numbers of random ports
+that have to be created during running random algorithm.
 3. Compare results for between all these samplings.
 This looping takes quite a lot of time, so we can jump directly to results.
 """
@@ -877,7 +1002,9 @@ This looping takes quite a lot of time, so we can jump directly to results.
 #   print(all_risks)
 #   print(all_tickers)
 
-"""The results of this loops we will load from dictionary saved as json file"""
+"""
+The results of this loops we will load from dictionary saved as json file
+"""
 
 # import urllib and json libraries
 import urllib.request, json
@@ -895,7 +1022,8 @@ print(type(results_random_looping['100']))
 print(len(results_random_looping['100']))
 print(results_random_looping['100'])
 
-"""We've got 6 lists: for 100, 200 ... 2170 random stocks.
+"""
+We've got 6 lists: for 100, 200 ... 2170 random stocks.
 
 Each of them contains 4 lists: 
 1. 'number of random ports',
@@ -943,9 +1071,18 @@ plt.legend(label, loc='best')
 # sharps = [[sharp_list[i]/sharp_list[0] for i in range(len(sharp_list))] for sharp_list in sharps]
 # tickers = [[ticker_list[i]/ticker_list[0] for i in range(len(ticker_list))] for ticker_list in sharps]
 
-"""As we can note increase of number of random ports that we create during random algorithm lead to decrease of differences in results made by various random seeds. For example, for 400 random stocks (red line) increase the number of random ports up to 160 (x-axis) has positive effect but more than 160 random ports has no improving effect, so any random seed that we would use, give us about the same result if we create more than 160 portfolios while running algorithm. 
+"""
+As we can note increase of number of random ports that we create during random algorithm lead
+to decrease of differences in results made by various random seeds. For example, for 400 random stocks
+(red line) increase the number of random ports up to 160 (x-axis) has positive effect but more than
+160 random ports has no improving effect, so any random seed that we would use, give us about
+the same result if we create more than 160 portfolios while running algorithm. 
 
-On the otherside, this number (160 or 100 or 200 or etc) varies depending on the amount of stocks that we use during sessions (100, 200, 400, 700 or 1100). And to be sure that continuation of executing script has no sense  (in another words: any increase of the number of random ports doesn't significantly decrease the difference in results) we can use Elbow method to stop. Below there are calculations by this method in relation to above graphs.
+On the otherside, this number (160 or 100 or 200 or etc) varies depending on the amount of stocks 
+that we use during sessions (100, 200, 400, 700 or 1100). And to be sure that continuation 
+of executing script has no sense  (in another words: any increase of the number of random ports 
+doesn't significantly decrease the difference in results) we can use Elbow method to stop. 
+Below there are calculations by this method in relation to above graphs.
 """
 
 def elbow_method(data, early_stop_k=1):
@@ -1015,9 +1152,13 @@ plt.scatter(tickers_stop_steps_x, tickers_stop_steps_y, color='y', s=100)
 
 
 
-"""As we see the elbow method could be very useful to stop random algorithm when the further running seems to be not effecient. Implementation the mechanism of preventing from early stops allows to  tune more accurately this proccess (you can play with changing the of 'early_stop_k' to 0 or 2 to see different results).
+"""
+As we see the elbow method could be very useful to stop random algorithm when the further running
+seems to be not effecient. Implementation the mechanism of preventing from early stops allows to tune
+more accurately this proccess (you can play with changing the of 'early_stop_k' to 0 or 2 to see different results).
 
-In 'results_random_looping' dictionary there is one more key: 2170. Let's plot it and use elbow function to see how it works now.
+In 'results_random_looping' dictionary there is one more key: 2170. Let's plot it 
+and use elbow function to see how it works now.
 """
 
 num_rand_ports = results_random_looping['2170'][0]  
@@ -1053,7 +1194,9 @@ plt.scatter(elbow_tickers_x, elbow_tickers_y)
 label = list(result_keys)[:-1]
 plt.legend(label, loc='best')
 
-"""And in this case we would stop the execution of script when there is no big difference in results of increase of number of random portfolios.
+"""
+And in this case we would stop the execution of script when there is no big difference in results
+of increase of number of random portfolios.
 
 It's time to add elbow method to random algorithm.
 """
@@ -1200,12 +1343,21 @@ patches = [mpatches.Patch(color=colors[i], label=str(str(keys[i]) + ': ' \
 plt.title('Scatter of Values and Distance Between Them')
 plt.legend(handles=patches, loc=4, numpoints=1)
 
-"""From the previous plots we can following conclusions:
-1. Increase of number of random portfolios (which we initialize to proceed filtering by risk and calculate 20 stocks with best sharpe ratio) lead to decrease in differences of results which we obtain during different random seed values. Thus there is no need to worry about running algorithm with certain random seed.
-2. Elbow stopping allows to break the algorithm when the further execution will not give a noticeable improvement in results (of maximazation the sharpe ratio).
-3. 'Averages of Sharpe Ratio' plot (the first one) also shows the relationship between the number of stocks we input to algorithm to find the best 20 and the value of sharpe ratio: the more stocks we use - the bigger sharpe ratio the algorithm can find (the better combination of 20 stocks)
+"""
+From the previous plots we can following conclusions:
+1. Increase of number of random portfolios (which we initialize to proceed filtering by risk 
+and calculate 20 stocks with best sharpe ratio) lead to decrease in differences of results
+which we obtain during different random seed values. Thus there is no need to worry 
+about running algorithm with certain random seed.
+2. Elbow stopping allows to break the algorithm when the further execution will not give a noticeable
+improvement in results (of maximazation the sharpe ratio).
+3. 'Averages of Sharpe Ratio' plot (the first one) also shows the relationship between the number of stocks
+we input to algorithm to find the best 20 and the value of sharpe ratio: the more stocks we use - 
+the bigger sharpe ratio the algorithm can find (the better combination of 20 stocks)
 
-One more important topic that we have not yet discussed is the time of running algorithm. Execution with elbow stopping and 500 stocks (the last slicing) in average lasts 5-6 minutes. Let's compare it with execution time of SLSQP optimization with the same stocks selection.
+One more important topic that we have not yet discussed is the time of running algorithm. Execution 
+with elbow stopping and 500 stocks (the last slicing) in average lasts 5-6 minutes. Let's compare 
+it with execution time of SLSQP optimization with the same stocks selection.
 """
 
 url = 'https://raw.githubusercontent.com/umachkaalex/stockmarket/master/pr_data_closes.csv'
@@ -1229,9 +1381,14 @@ eq_opt_dic = optimization_procedure(algo_optimization, all_pr_data_closes,
 print(eq_opt_dic)
 print(time.time()-s_time)
 
-"""The optimimal result has been recieved in about 13 sec. But despite such huge plus in time, the SLSQP algorithm "propose" the portfolio with allocation of 21 stocks (that is close to our goal), but almost 0.5 point of risk, that is very far from 0.1 that gave us random algorithm (with risk filter set to 0.15). 
+"""
+The optimimal result has been recieved in about 13 sec. But despite such huge plus in time, 
+the SLSQP algorithm "propose" the portfolio with allocation of 21 stocks (that is close to our goal), 
+but almost 0.5 point of risk, that is very far from 0.1 that gave us random algorithm
+(with risk filter set to 0.15). 
 
-As we found out, the integer constraint we can not implement within SLSQP algorithm, but float constraint that has to limit risk we can. Let's do it.
+As we found out, the integer constraint we can not implement within SLSQP algorithm, 
+but float constraint that has to limit risk we can. Let's do it.
 """
 
 def algo_optimization_risk(closes_data, weights, st_cap, start, end, max_pos,
@@ -1287,9 +1444,13 @@ eq_opt_dic = optimization_procedure(algo_optimization_risk, all_pr_data_closes,
 print(eq_opt_dic)
 print(time.time()-s_time)
 
-"""Now we have recieved acceptable risk and even better sharpe ratio than random algorithm. Time has tripled, but still superiorly. But we see the increase in amount of stocks after optimization - now it is 24. 
+"""
+Now we have recieved acceptable risk and even better sharpe ratio than random algorithm.
+Time has tripled, but still superiorly. But we see the increase in amount of stocks
+after optimization - now it is 24. 
 
-To check how does execution time of two approaches changes depending on amount of stocks, let's run such code (or jump to results, because it lasts long time).
+To check how does execution time of two approaches changes depending on amount of stocks,
+let's run such code (or jump to results, because it lasts long time).
 """
 
 # # define the list of numbers of stocks used in optimization
@@ -1416,14 +1577,28 @@ for i in range(int(len(columns)/2)):
   ax2.set_ylim([y_min-(y_max - y_min)*0.1,
                  y_max+(y_max - y_min)*0.1])
 
-"""Analyzing this graphs, first of all, striking that with increase of number of input features (stocks in our case), the time of finding optimal solution by SLSQP method rises like geometric progression.
+"""
+Analyzing this graphs, first of all, striking that with increase of number of input features 
+(stocks in our case), the time of finding optimal solution by SLSQP method rises like geometric progression.
 
-Secondly, after 1000 input stocks, SLSQP method can't handle risk constrains: the risk of optimized allocation start to rise. It rises inline with Sharpe Ratio which indicates that SLSQP first of all 'tries' to optimize objective function.
+Secondly, after 1000 input stocks, SLSQP method can't handle risk constrains: the risk
+of optimized allocation start to rise. It rises inline with Sharpe Ratio which indicates that SLSQP
+first of all 'tries' to optimize objective function.
 
-Looking at random algorithm results, we can note linear increase of execution time and stable holding of risk limit. But as for objective: maximizing the sharpe ratio, we see that it loses to SLSQP optimization. This is because of doing risk filtering at first and afte that sharpe maximization. Also such approach leads to rare errors in random algorithm (when there are less stocks then required after risk filtering).
+Looking at random algorithm results, we can note linear increase of execution time and stable holding
+of risk limit. But as for objective: maximizing the sharpe ratio, we see that it loses to SLSQP optimization.
+This is because of doing risk filtering at first and afte that sharpe maximization. Also such approach leads
+to rare errors in random algorithm (when there are less stocks then required after risk filtering).
 
-So if you have not a "big" amount of input features to optimize (for example you want to minimize delivery costs of 500 goods that you're selling) it's better to use SLSQP alike methods. But if there are more than 1000 goods and you need to take into account certain constrains, it's better to code something like this proposed algorithm. May be, if we combine two methods in one: for example first run random risk filtering and than maximize sharpe ratio with SLSQP - it will give us acceptable execution time, handling of risk limits and stable increase in sharpe ratio (with increase of number of input features, stocks in this case).
+So if you have not a "big" amount of input features to optimize (for example you want to minimize 
+delivery costs of 500 goods that you're selling) it's better to use SLSQP alike methods.
+But if there are more than 1000 goods and you need to take into account certain constrains,
+it's better to code something like this proposed algorithm. May be, if we combine two methods in one:
+for example first run random risk filtering and than maximize sharpe ratio with SLSQP - it will give us
+acceptable execution time, handling of risk limits and stable increase in sharpe ratio
+(with increase of number of input features, stocks in this case).
 
-Also the time execution of random method can be reduced by implementing it with Numba library, which run calculations on GPU.
+Also the time execution of random method can be reduced by implementing it with Numba library,
+which run calculations on GPU.
 """
 
