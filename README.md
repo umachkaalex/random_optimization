@@ -8,4 +8,4 @@ but on the other it's better to maximize its size to let it carry as more passen
 In the age of big data, productive computers and massive cloud computing, to solve such optimization problems became more convenient. But on the other hand - the bigger data you want to process the more complicated calculations you have to conduct. Let's take an example from real world - from the world of stock market.
 
 More here:
-https://nbviewer.jupyter.org/github/umachkaalex/stockmarket/blob/master/algo_for_medium.ipynb
+https://nbviewer.jupyter.org/github/umachkaalex/random_optimization/blob/master/algo_for_medium.ipynb
