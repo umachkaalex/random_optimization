@@ -6,5 +6,4 @@ Candy makers have to optimize their plan of production every month for hundreds 
 
 Imagine we are the bosses of a small pizzeria. But despite it is small, it is very popular because we cook pizza by “family” recipe and thus we have many delivery orders during the day. Now we have several pizza delivery boys, but as the business is growing and the area of customers expands, we faced the optimization problem of delivery process:
 
-More here:
 https://nbviewer.jupyter.org/github/umachkaalex/random_optimization/blob/master/algo_for_medium.ipynb
